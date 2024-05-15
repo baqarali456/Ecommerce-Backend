@@ -13,6 +13,18 @@ const addressSchema = new Schema(
         pincode:{
             type: Number,
             required: true,
+        },
+        landmark:{
+            type: String,
+            required: true
+        },
+        street:{
+            type: String,
+            required: true,
+        },
+        owner:{
+            type:Schema.Types.ObjectId,
+            ref:"User",
         }
     }
     ,{timestamps:true})
