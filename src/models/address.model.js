@@ -2,6 +2,14 @@ import mongoose,{Schema} from "mongoose";
 
 const addressSchema = new Schema(
     {
+        fullName:{
+         type: String,
+         required: true,
+        },
+        phoneNumber:{
+         type: Number,
+         required: true,
+        },
         city:{
             type: String,
             required: true,
