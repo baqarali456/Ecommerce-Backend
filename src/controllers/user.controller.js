@@ -6,10 +6,12 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 const generateAccessandRefreshToken = async(userId) =>{
  try {
-    const user = await User.findById(user._id)
+    const user = await User.findById(userId)
     const accessToken = user.generateAccessToken()
-    const newrefreshToken = user.generateRefreshToken()
-    user.refreshToken = newrefreshToken
+    console.log(accessToken)
+    const refreshToken = user.generateRefreshToken()
+    console.log(refreshToken)
+    user.refreshToken = refreshToken
     await user.save({validateBeforeSave:false})
     return {accessToken,refreshToken}
  } catch (error) {
@@ -106,8 +108,15 @@ const logoutUser = asyncHandler(async(req,res)=>{
         }
      )
 
+     const options = {
+        httpOnly : true,
+        secure : true
+     }
+
      return res
      .status(200)
+     .clearCookie("accessToken",options)
+     .clearCookie("refreshToken",options)
      .json(
         new ApiResponse(200,{},"user logout successfully")
      )

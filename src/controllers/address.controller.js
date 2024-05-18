@@ -1,7 +1,7 @@
-import { Address } from "../models/address.model";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
+import { Address } from "../models/address.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import mongoose,{isValidObjectId} from "mongoose";
 
 const add_Address = asyncHandler(async(req,res)=>{
@@ -105,6 +105,23 @@ const getAlluserAddress = asyncHandler(async(req,res)=>{
     )
 })
 
+const deleteAddress = asyncHandler(async(req,res)=>{
+    const {addressId} = req.params;
+    const isValidaddressId = isValidObjectId(addressId)
+    if(!isValidaddressId){
+        throw new ApiError(401,"addressId is not valid")
+    }
+
+    const address = await Address.findByIdAndDelete(addressId)
+    if(!address) throw new ApiError(404,"address doesn't exist")
+
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(200,{},"delete address successfully")
+        )
+})
+
 
 
 
@@ -113,5 +130,6 @@ export {
     add_Address,
     updateAddressById,
     getAddressBYId,
-    getAlluserAddress
+    getAlluserAddress,
+    deleteAddress
 }

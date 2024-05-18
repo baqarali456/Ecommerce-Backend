@@ -1,9 +1,9 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { Product } from "../models/product.model";
-import { ApiError } from "../utils/ApiError";
-import { asyncHandler } from "../utils/asyncHandler";
-import { uploadonCloudinary } from "../utils/cloudinary";
-import { ApiResponse } from "../utils/ApiResponse";
+import { Product } from "../models/product.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { uploadonCloudinary } from "../utils/cloudinary.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { Category } from "../models/category.model.js"
 
 const createProduct = asyncHandler(async(req,res)=>{
@@ -181,6 +181,26 @@ const getAllProducts = asyncHandler(async(req,res)=>{
     .json(
         new ApiResponse(200,ALL_PRODUCTS,"successfully get all Products")
     )
+})
+
+const getProductById = asyncHandler(async(req,res)=>{
+    const {productId} = req.params;
+
+    const isValidproductId = isValidObjectId(productId)
+    if(!isValidproductId){
+       throw new ApiError(401,"product is not valid")
+    }
+
+   const product = await Product.findById(productId)
+   if(!product){
+    throw new ApiError(404,"product doesn't exist")
+   }
+
+   return res
+   .status(200)
+   .json(
+    new ApiResponse(200,product,"successfull product by Id")
+   );
 })
 
 export {
