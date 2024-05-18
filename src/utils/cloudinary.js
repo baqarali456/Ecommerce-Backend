@@ -1,9 +1,9 @@
 import {v2 as cloudinary} from 'cloudinary';
 import fs from "fs"
 cloudinary.config({ 
-    cloud_name: "dhcamra6a", 
-    api_key: "361346215217979", 
-    api_secret: "<your_api_secret>" // Click 'View Credentials' below to copy your API secret
+    cloud_name: process.env.CLOUDINARY_NAME, 
+    api_key: process.env.CLOUDINARY_KEY, 
+    api_secret: process.env.CLOUDINARY_SECRET // Click 'View Credentials' below to copy your API secret
 });
 
 const uploadonCloudinary = async(localFilepath) =>{
