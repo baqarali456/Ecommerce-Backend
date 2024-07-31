@@ -27,8 +27,8 @@ const registerUser = asyncHandler(async(req,res)=>{
     // if user not already registered then user create 
     // send through response
     
-    const {username,email,password,phoneNumber} = req.body;
-    if([username,email,password,phoneNumber].some(fields=>fields?.trim() === "")){
+    const {username,email,password,phoneNumber,role} = req.body;
+    if([username,email,password,phoneNumber,role].some(fields=>fields?.trim() === "")){
       throw new ApiError(401,"all fields are required")  
     }
     
@@ -44,7 +44,8 @@ const registerUser = asyncHandler(async(req,res)=>{
         username,
         email,
         password,
-        phoneNumber
+        phoneNumber,
+        role,
     })
 
     if(!RegisteredUser){
@@ -101,7 +102,7 @@ const logoutUser = asyncHandler(async(req,res)=>{
         {
             $unset:{
                 refreshToken:1,
-            }
+            },
         },
         {
             new : true,
@@ -212,8 +213,10 @@ const changeUserDetails = asyncHandler(async(req,res)=>{
     }
 })
 
-const getUserProfile = asyncHandler(async(req,res)=>{
-    const userProfile = await User.findById(req.user._id,{email:1,username:1,phoneNumber:1})
+const getCurrentUser = asyncHandler(async(req,res)=>{
+    const userProfile = await User.findById(req.user._id).select(
+        "-password -refreshToken -phoneNumber"
+    )
 
     return res
     .status(200)
@@ -231,5 +234,5 @@ export {
     refresh_RefreshToken,
     changePassword,
     changeUserDetails,
-    getUserProfile
+    getCurrentUser
 }

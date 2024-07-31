@@ -10,17 +10,26 @@ const createProduct = asyncHandler(async(req,res)=>{
 
     const {name,description,price,stock,category} = req.body;
     if(!name?.trim() || !description?.trim()){
+        console.log(name,description)
         throw new ApiError(401,"name or description is required")
     }
  
+    console.log("req.file",req.file)
     const productImagePath = req.file?.path;
-
+    console.log("productimgPath",productImagePath)
+    
+    const isValidCategoryId = isValidObjectId(category);
+    console.log("category",category)
+    
+    if(!isValidCategoryId) throw new ApiError(401,"category id is not valid");
+    
     const existCategory = await Category.findById(category)
     if(!existCategory){
         throw new ApiError(404,"category doesn't exist")
     }
 
    const productImage = await uploadonCloudinary(productImagePath)
+   console.log("productImage",productImage)
    if(!productImage){
     throw new ApiError(401,"Product Image is required")
    }
