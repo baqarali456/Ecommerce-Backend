@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { createProduct, deleteProduct, getAllProducts, getProductById, getProductsByCategory, updateProduct } from "../controllers/product.controller.js";
+import { createProduct, deleteProduct, getadminAllProducts, getProductById, getProductsByCategory, getUserAllProducts, updateProduct } from "../controllers/product.controller.js";
 import { adminMiddleware } from "../middlewares/admin.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -17,8 +17,9 @@ productRouter.route('/create-Product').post(
 )
 productRouter.route('/update-product/:productId').patch(adminMiddleware, updateProduct)
 productRouter.route('/delete-product/:productId').delete(adminMiddleware, deleteProduct)
-productRouter.route('/getProduct/:productId').get(adminMiddleware, getProductById)
-productRouter.route('/getProductsByCategory/:categoryId').get(adminMiddleware, getProductsByCategory)
-productRouter.route('/getall-products').get(getAllProducts)
+productRouter.route('za/getProduct/:productId').get(adminMiddleware, getProductById)
+productRouter.route('/getProductsByCategory/:categoryId').get( getProductsByCategory)
+productRouter.route('/getall-products').get(verifyJWT,adminMiddleware,getadminAllProducts)
+productRouter.route('/usergetall-products').get(verifyJWT,getUserAllProducts)
 
 export { productRouter }

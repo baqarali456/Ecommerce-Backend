@@ -1,86 +1,118 @@
-import { Product } from "../models/product.model.js";
+import mongoose, { isValidObjectId } from "mongoose";
 import { Wishlist } from "../models/wishlist.model.js";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import mongoose,{isValidObjectId} from "mongoose";
+import { ApiError } from "../utils/ApiError.js";
+import { Product } from "../models/product.model.js";
 
-export const addProductinWishlist = asyncHandler(async(req,res)=>{
-    const {productId,WishlistId} = req.params;
-    const isValidproductId = isValidObjectId(productId);
-    const isValidWishlistId = isValidObjectId(WishlistId);
-    if(!isValidproductId || !isValidWishlistId){
-        throw new ApiError(401,"productid or isValidWishlistId  is not valid")
-    }
+export const createUserWishlist = asyncHandler(async (req, res) => {
+  const wishlist = await Wishlist.create({
+    owner: req.user._id,
+  });
 
-    const product = await Product.findById(productId)
-   if(!product){
-    throw new ApiError(404,"product does not exist")
-   }
-
-    const favouriteProducts = await Wishlist.findByIdAndUpdate(
-        WishlistId,
-        {
-            $push:{favourites:productId}
-        }
-    )
-
-    return res
+  return res
     .status(200)
-    .json(
-        new ApiResponse(200,favouriteProducts,"successfully add product in wishlist")
-    )
+    .json(new ApiResponse(200, wishlist, "successfully create wishlist"));
+});
 
-})
+export const addProductinWishlist = asyncHandler(async (req, res) => {
+  const { wishlistId, productId } = req.params;
+  const validwishlistId = isValidObjectId(wishlistId);
+  const validproductId = isValidObjectId(productId);
 
-export const deletedProductinWishlist = asyncHandler(async(req,res)=>{
-    const {productId,WishlistId} = req.params;
-    const isValidproductId = isValidObjectId(productId);
-    const isValidWishlistId = isValidObjectId(WishlistId);
-    if(!isValidproductId || !isValidWishlistId){
-        throw new ApiError(401,"productid or isValidWishlistId  is not valid")
-    }
+  if (!validproductId) throw new ApiError(401, "product id is not valid");
+  if (!validwishlistId) throw new ApiError(401, "wishlist id is not valid");
 
-   const product = await Product.findById(productId)
-   if(!product){
-    throw new ApiError(404,"product does not exist")
-   }
+  const product = await Product.findById(productId);
+  if (!product) throw new ApiError(401, "product doesn't exist");
 
-   const userdeleteProductinWishlist = await Wishlist.findByIdAndUpdate(
-    WishlistId,
+  const updatedUserwishlist = await Wishlist.findByIdAndUpdate(
+    wishlistId,
     {
-        $pull:{favourites:productId}
+      $push: { favourites: productId },
+    },
+    {
+      new: true,
     }
-   )
+  );
 
-   return  res
-   .status(200)
-   .json(
-    new ApiResponse(200,userdeleteProductinWishlist,"successfully delete Products")
-   )
-
-})
-
-export const getAllProductsinWishlist = asyncHandler(async(req,res)=>{
-    const getUserFavouritesProducts = await Wishlist.aggregate([
-        {
-            $match:{
-                owner:new mongoose.Types.ObjectId(req.user?._id)
-            }
-        },
-        {
-            $lookup:{
-                from:"products",
-                localField:"favourites",
-                foreignField:"_id",
-                as:"favourites"
-            }
-        }
-    ])
-
-    return res
+  return res
     .status(200)
-    .json(
-        new ApiResponse(200,getUserFavouritesProducts,"successfully get user wishlist products")
-    )
-})
+    .json(new ApiResponse(200, updatedUserwishlist, "add product in wishlist"));
+});
+
+export const removeProductinWishlist = asyncHandler(async (req, res) => {
+  const { wishlistId, productId } = req.params;
+  const validwishlistId = isValidObjectId(wishlistId);
+  const validproductId = isValidObjectId(productId);
+
+  if (!validproductId) throw new ApiError(401, "product id is not valid");
+  if (!validwishlistId) throw new ApiError(401, "wishlist id is not valid");
+
+  const product = await Product.findById(productId);
+  if (!product) throw new ApiError(401, "product doesn't exist");
+
+  const updatedUserwishlist = await Wishlist.findByIdAndUpdate(
+    wishlistId,
+    {
+     $pull:{favourites:productId}
+    },
+    {
+      new: true,
+    }
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUserwishlist, "add product in wishlist"));
+});
+
+export const getUserallProductsinWishlist = asyncHandler(async (req, res) => {
+  const { wishlistId } = req.params;
+  const validwishlistId = isValidObjectId(wishlistId);
+
+  if (!validwishlistId) throw new ApiError(401, "wishlist id is not valid");
+
+  const userWishlist = await Wishlist.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(wishlistId),
+      },
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "favourites",
+        foreignField: "_id",
+        as: "favourites",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+              price: 1,
+              productImage: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        NumberofProductsinWishlist: {
+          $size: "$favourites",
+        },
+      },
+    },
+    {
+      $project: {
+        owner: 1,
+        favourites: 1,
+        NumberofProductsinWishlist: 1,
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, userWishlist, "get user wishlist successfully"));
+});

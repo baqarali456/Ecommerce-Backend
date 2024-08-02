@@ -5,51 +5,80 @@ import { Cart } from "../models/cart.model.js";
 import { Product } from "../models/product.model.js";
 import {ApiResponse} from "../utils/ApiResponse.js"
 
+const createCart = asyncHandler(async(req,res)=>{
+
+    const cart = await Cart.create({
+        customer:req.user._id
+    })
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,cart,"cart create successfully")
+    )
+})
+
 export const addProductinCart = asyncHandler(async(req,res)=>{
-    try {
-        const {productId} = req.params;
+    
+        const {cartId,productId} = req.params;
         const isValidProductId = isValidObjectId(productId);
+        const isValidcartId = isValidObjectId(cartId);
     
         if(!isValidProductId){
+            throw new ApiError(401,'productId is not valid');
+        }
+        if(!isValidcartId){
             throw new ApiError(401,'productId is not valid');
         }
 
         const product = await Product.findById(productId)
         if(!product) throw new ApiError(404,"product not found")
     
-        const additeminCart = await Cart.create({
-           cartitem:[
+        const additeminCart = await Cart.findByIdAndUpdate(
+            cartId,
             {
-                productId,
+                $push:{cartitem:productId}
+            },
+            {
+                new:true
             }
-           ],
-           customer:req.user._id,
-        })
+        )
 
         return res.status(200)
         .json(new ApiResponse(200,additeminCart,"add product in cart successfully"))
-    } catch (error) {
-        throw new ApiError(500,error || "Server Problem")
-    }
+    
 
     
 })
 
 export const removeProductinCart = asyncHandler(async(req,res)=>{
-    const {cartId} = req.params;
+    const {cartId,productId} = req.params;
+        const isValidProductId = isValidObjectId(productId);
+        const isValidcartId = isValidObjectId(cartId);
     
-    const isValidCartId = isValidObjectId(cartId)
+        if(!isValidProductId){
+            throw new ApiError(401,'productId is not valid');
+        }
+        if(!isValidcartId){
+            throw new ApiError(401,'productId is not valid');
+        }
 
-    if(!isValidCartId) throw new ApiError(401,"cart id is not valid")
+        const product = await Product.findById(productId)
+        if(!product) throw new ApiError(404,"product not found")
+    
+        const removeiteminCart = await Cart.findByIdAndUpdate(
+            cartId,
+            {
+                $pull:{cartitem:productId}
+            },
+            {
+                new:true
+            }
+        )
 
-      const deletedCart = await Cart.deleteOne({_id:cartId})
-      if(!deletedCart) throw new ApiError(401,"this cart item does not exist")
-
-    return res.status(200)
-    .json(
-        new ApiResponse(200,deletedCart,"successfully deleted this cart")
-    )
-
+        return res.status(200)
+        .json(new ApiResponse(200,removeiteminCart,"remove product in cart successfully"))
+    
 })
 
 
