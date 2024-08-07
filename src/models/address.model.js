@@ -33,6 +33,11 @@ const addressSchema = new Schema(
         owner:{
             type:Schema.Types.ObjectId,
             ref:"User",
+        },
+        type:{
+            type:String,
+            enum:["Home","Work","Office"],
+            default:"Home"
         }
     }
     ,{timestamps:true})

@@ -20,12 +20,6 @@ const userSchema = new Schema(
             type: String,
             required: true
         },
-        address:[
-            {
-            type:Schema.Types.ObjectId,
-            ref:"Address"
-            }
-        ],
         phoneNumber:{
             type:Number,
             required:true,
