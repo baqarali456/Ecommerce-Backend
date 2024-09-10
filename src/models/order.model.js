@@ -27,6 +27,23 @@ const orderSchema = new Schema(
             type: String,
             enum: ["PENDING","CANCELLED","DELIVERED"],
             default: "PENDING",
+        },
+        address:{
+            type:Schema.Types.ObjectId,
+            ref:"Address"
+        },
+        paymentSuccess:{
+            type:Boolean,
+            default:false
+        },
+        paymentMessage:{
+            type:String,
+            enum:["Pending","Done","Failed"],
+            default:"Pending"
+        },
+        paymentId:{
+            type:String,
+            required:true,
         }
     }
     ,{timestamps:true})

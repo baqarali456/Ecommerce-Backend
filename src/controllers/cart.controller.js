@@ -4,10 +4,13 @@ import { ApiError } from "../utils/ApiError.js";
 import { Cart } from "../models/cart.model.js";
 import { Product } from "../models/product.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { Address } from "../models/address.model.js";
 
 export const createCart = asyncHandler(async (req, res) => {
+  const address = await Address.findOne()
   const cart = await Cart.create({
     customer: req.user._id,
+    address:address._id
   });
 
   return res
@@ -166,11 +169,11 @@ export const userGetAllCartItems = asyncHandler(async (req, res) => {
     );
 });
 
-export const userGetTotalCartPrice = asyncHandler(async (req, res) => {
-  const alluserCartProducts = await Cart.aggregate([
+export const getTotalPriceCart = async(userId) =>{
+  const getTotalPrice =  await Cart.aggregate([
     {
       $match: {
-        customer: new mongoose.Types.ObjectId(req.user?._id),
+        customer: new mongoose.Types.ObjectId(userId),
       },
     },
     {
@@ -208,13 +211,22 @@ export const userGetTotalCartPrice = asyncHandler(async (req, res) => {
       },
     },
   ]);
+  
+
+  return getTotalPrice[0]
+
+}
+
+export const userGetTotalCartPrice = asyncHandler(async (req, res) => {
+  
+  const getuserCartPrice  = await getTotalPriceCart(req.user?._id)
 
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        alluserCartProducts[0],
+        getuserCartPrice,
         "get user Total Amount Of Products in Cart"
       )
     );

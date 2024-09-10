@@ -20,6 +20,7 @@ import { categoryRouter } from "./routes/category.route.js";
 import { productRouter } from "./routes/product.route.js";
 import { wishlistRouter } from "./routes/wishlist.route.js";
 import { cartRouter } from "./routes/cart.route.js";
+import { orderRouter } from "./routes/order.route.js";
 
 
 // declaration routes
@@ -29,5 +30,6 @@ app.use('/api/v1/category',categoryRouter)
 app.use('/api/v1/products',productRouter)
 app.use('/api/v1/wishlist',wishlistRouter)
 app.use('/api/v1/cart',cartRouter)
+app.use('/api/v1/order',orderRouter)
 
 export {app}

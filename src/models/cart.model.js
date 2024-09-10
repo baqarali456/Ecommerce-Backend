@@ -13,6 +13,10 @@ const cartSchema = new mongoose.Schema({
             }
         }
     ],
+    address:{
+     type:mongoose.Schema.Types.ObjectId,
+     ref:"Address"
+    },
     customer:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
