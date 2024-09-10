@@ -7,16 +7,32 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Address } from "../models/address.model.js";
 
 export const createCart = asyncHandler(async (req, res) => {
-  const address = await Address.findOne()
+  const address = await Address.findOne({owner:req.user._id})
+  if(!address){
+    throw new ApiError(404,"address not found")
+  }
   const cart = await Cart.create({
-    customer: req.user._id,
-    address:address._id
+     customer:req.user._id,
+    address:address._id,
   });
 
   return res
     .status(200)
     .json(new ApiResponse(200, cart, "cart create successfully"));
 });
+
+const getCart = asyncHandler(async(req,res)=>{
+
+  const cart = await Cart.findOne({customer:req.user._id})
+  if(!cart){
+    throw new ApiError(404,"cart not found")
+  }
+   return res
+   .status(200)
+   .json(
+    new ApiResponse(200,getCart,"user get cart successfully")
+   )
+})
 
 export const addProductinCart = asyncHandler(async (req, res) => {
   const { productId } = req.params;
